@@ -17,6 +17,8 @@ import javax.swing.JTextField;
 
 
 
+
+import downloader.FileDownloading;
 import downloader.FileToDownload;
 import terminal.CallHandler;
 
@@ -29,11 +31,13 @@ public class ControlPanel extends JPanel {
 	private TerminalPanel terminal;
 	private String overallDestionation = "";
 	private FileToDownload[] filesToDownload = new FileToDownload[0];
+	private ArrayList<String> extensions;
 	public ControlPanel(MainActivityPanel activity, TerminalPanel terminal)
 	{
 		super();
 		this.terminal = terminal;
 		this.activity = activity;
+		extensions = new ArrayList<String>();
 		setBackground(Color.GRAY);
 		createMainControlPanel();
 	}
@@ -65,9 +69,18 @@ public class ControlPanel extends JPanel {
 		revalidate();
 		repaint();
 	}
+	public String[] toArray(ArrayList<String> files)
+	{
+		String[] newFiles = new String[files.size()];
+		for(int i = 0 ; i < files.size() ;i++)
+		{
+			newFiles[i] = files.get(i);
+		}
+		return newFiles;
+	}
 	public void selectionView()
 	{
-		activity.filesToDonwloadView(filesToDownload);
+		activity.filesToDonwloadView(filesToDownload,toArray(extensions));
 		removeAll();
 		JButton back = new JButton("Back");
 		back.addActionListener(e ->
@@ -87,13 +100,21 @@ public class ControlPanel extends JPanel {
 				  overallDestionation = chooser.getSelectedFile().getAbsolutePath();
 			 } 
 		});
+		setDestination.setEnabled(false);
 		JCheckBox applyAll = new JCheckBox("Same destination for all");
-		applyAll.setSelected(true);
+		applyAll.setSelected(false);
 		applyAll.addActionListener(e ->
 		{
 			setDestination.setEnabled(!setDestination.isEnabled());
 		});
 		applyAll.setBackground(Color.GRAY);
+		JButton addExtensions = new JButton("Add extension");
+		addExtensions.addActionListener(e ->
+		{
+			String extensionString = JOptionPane.showInputDialog("Enter an extension");
+			extensions.add(extensionString);
+			activity.filesToDonwloadView(filesToDownload, toArray(extensions));
+		});
 		JButton addURL = new JButton("Add URL");
 		addURL.addActionListener(e ->
 		{
@@ -104,7 +125,7 @@ public class ControlPanel extends JPanel {
 				{
 					FileToDownload newFile = new FileToDownload(url,overallDestionation);
 					filesToDownload = addFile(filesToDownload,newFile);
-					activity.filesToDonwloadView(filesToDownload);
+					activity.filesToDonwloadView(filesToDownload,toArray(extensions));
 				}
 				else
 				{
@@ -128,7 +149,7 @@ public class ControlPanel extends JPanel {
 				} 		
 				FileToDownload newFile = new FileToDownload(url,path);
 				filesToDownload = addFile(filesToDownload,newFile);
-				activity.filesToDonwloadView(filesToDownload);
+				activity.filesToDonwloadView(filesToDownload,toArray(extensions));
 			}
 		});
 		JButton download = new JButton("Proceed");
@@ -136,10 +157,19 @@ public class ControlPanel extends JPanel {
 		{
 			filesExtracted();
 		});
+		JCheckBox slowDown = new JCheckBox("Slow Down Download");
+		slowDown.setSelected(false);
+		slowDown.addActionListener(e ->
+		{
+			activity.slowDown = !activity.slowDown;
+		});
+		slowDown.setBackground(Color.GRAY);
 		add(back);
 		add(applyAll);
 		add(addURL);
 		add(setDestination);
+		add(addExtensions);
+		add(slowDown);
 		add(download);
 		revalidate();
 		repaint();
@@ -147,8 +177,6 @@ public class ControlPanel extends JPanel {
 	public void filesExtracted()
 	{
 		removeAll();
-		ArrayList<String> extensions = new ArrayList<String>();
-		extensions.add("png");
 		ArrayList<FileToDownload> links = activity.extractFilesDisplay(filesToDownload,extensions);
 		JButton back = new JButton("Back");
 		back.addActionListener(e->

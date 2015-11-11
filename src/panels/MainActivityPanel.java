@@ -20,6 +20,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingWorker;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -37,6 +38,8 @@ public class MainActivityPanel extends JPanel implements Observer {
 	private JTextArea mainArea;
 	private JList<FileToDownload> listOfFilesToDownload;
 	private JList<FileDownloading> listOfFilesDownloading;
+	private JList<String> listOfExtensions;
+	public boolean slowDown = false;
 	public MainActivityPanel()
 	{
 		super(new GridBagLayout());
@@ -50,7 +53,7 @@ public class MainActivityPanel extends JPanel implements Observer {
 		ArrayList<FileDownloading> fileResults = new ArrayList<FileDownloading>();
 		for(FileToDownload file: links)
 		{
-			fileResults.add(new FileDownloading(file,"PENDING"));
+			fileResults.add(new FileDownloading(file,"PENDING", 0));
 		}
 		downloadingListView(toArray(fileResults));
 		ExecutorService executor = Executors.newFixedThreadPool(noThreads);
@@ -60,22 +63,47 @@ public class MainActivityPanel extends JPanel implements Observer {
 			{
 				@Override
 				public void run() {
+					link.setStatus("STARTED");
 					try
 					{
-						link.setStatus("STARTED");
-						downloadingListView(toArray(fileResults));
-						getImages(link.getFile().getURL(),link.getFile().getPath());
+						String src = link.getFile().getURL();
+						String folderPath = link.getFile().getPath();
+						int indexname = src.lastIndexOf("/");
+						if (indexname == src.length()) {
+							src = src.substring(1, indexname);
+						}
+						indexname = src.lastIndexOf("/");
+						String name = src.substring(indexname, src.length());
+						URL url = new URL(src);
+						InputStream in = url.openStream();
+						OutputStream out = new BufferedOutputStream(new FileOutputStream(folderPath + name));
+						ArrayList<Integer> bytes = new ArrayList<Integer>();
+						for (int b; (b = in.read()) != -1;) {
+							bytes.add(b);
+						}
+						for(int i = 0 ; i < bytes.size() ; i++)
+						{
+							if(slowDown) Thread.sleep(2);
+							out.write(bytes.get(i));
+							link.setPercentage((i * 100) / bytes.size());
+							listOfFilesDownloading.repaint();
+						}
+						link.setPercentage(100);
+						out.close();
+						in.close();
 						link.setStatus("COMPLETED");
-						downloadingListView(toArray(fileResults));
+						listOfFilesDownloading.repaint();
+
 					}
-					catch(IOException e)
+					catch(Exception e)
 					{
 						link.setStatus("FAILED");
-						downloadingListView(toArray(fileResults));
-					}				
-				}			
+						listOfFilesDownloading.repaint();
+					}
+				}
 			});
 		}
+		executor.shutdown();
 	}
 	public FileDownloading[] toArray(ArrayList<FileDownloading> files)
 	{
@@ -164,7 +192,7 @@ public class MainActivityPanel extends JPanel implements Observer {
        	revalidate();
        	repaint();
 	}
-	public void filesToDonwloadView(FileToDownload[] messages)
+	public void filesToDonwloadView(FileToDownload[] messages,String[] extensions)
 	{
 		if(messages.length > 0)
 		{
@@ -178,10 +206,22 @@ public class MainActivityPanel extends JPanel implements Observer {
 	        GridBagConstraints constraints = new GridBagConstraints();
 	       	constraints.gridwidth = GridBagConstraints.REMAINDER;
 	       	constraints.fill = GridBagConstraints.HORIZONTAL;
-	      	constraints.fill = GridBagConstraints.BOTH;
+	    	constraints.fill = GridBagConstraints.BOTH;
 	       	constraints.weightx = 1.0;
 	       	constraints.weighty = 1.0;
-			add(scrollPane,constraints);
+			listOfExtensions = new JList<String>(extensions);
+			listOfExtensions.setBackground(new Color(24,24,24));
+			listOfExtensions.setForeground(Color.WHITE);
+			listOfExtensions.setFont(new Font(Font.MONOSPACED,Font.PLAIN,15));
+			JScrollPane scrollPane2 = new JScrollPane(listOfExtensions);
+	        GridBagConstraints constraints2 = new GridBagConstraints();
+	       	constraints2.gridwidth = GridBagConstraints.REMAINDER;
+	       	constraints2.fill = GridBagConstraints.HORIZONTAL;
+	       	constraints2.fill = GridBagConstraints.BOTH;
+	       	constraints2.weightx = 1.1;
+	       	constraints2.weighty = 1.1;
+	       	add(scrollPane,constraints);
+			add(scrollPane2,constraints2);
 			revalidate();
 	       	repaint();
 		}
@@ -213,22 +253,5 @@ public class MainActivityPanel extends JPanel implements Observer {
 	public void update(Observable arg0, Object arg1) {
 		// TODO Auto-generated method stub
 		
-	}
-	private static void getImages(String src,String folderPath) throws IOException 
-	{
-		int indexname = src.lastIndexOf("/");
-		if (indexname == src.length()) {
-			src = src.substring(1, indexname);
-		}
-		indexname = src.lastIndexOf("/");
-		String name = src.substring(indexname, src.length());
-		URL url = new URL(src);
-		InputStream in = url.openStream();
-		OutputStream out = new BufferedOutputStream(new FileOutputStream(folderPath + name));
-		for (int b; (b = in.read()) != -1;) {
-			out.write(b);
-		}
-		out.close();
-		in.close();
 	}
 }
