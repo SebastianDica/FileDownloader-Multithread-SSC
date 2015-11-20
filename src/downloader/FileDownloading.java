@@ -1,9 +1,21 @@
 package downloader;
-
+/**
+ * This is a class that represents a file that is currently
+ * being downloaded. It provides an interface for progress view 
+ * and status.
+ * @author Sebastian
+ *
+ */
 public class FileDownloading {
 	private FileToDownload file;
 	private String status;
 	private int percentage;
+	/**
+	 * The constructor for the FileDownloading class.
+	 * @param file The file that is being downloaded.
+	 * @param status The status of the download action.
+	 * @param percentage The progress for a scale from 0 - 100.
+	 */
 	public FileDownloading(FileToDownload file, String status, int percentage)
 	{
 		this.file = file;

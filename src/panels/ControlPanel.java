@@ -3,25 +3,25 @@ package panels;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-
-
-
-
-
-import downloader.FileDownloading;
 import downloader.FileToDownload;
 import terminal.CallHandler;
-
+/**
+ * The control panel represents the interaction
+ * of the user with the system.
+ * It puts together the buttons, text files or
+ * path choosers that the user might need in order
+ * to provide input to the system.
+ * It has several forms with different buttons or 
+ * input components that prove to be useful during
+ * the interaction with the system.
+ * @author Sebastian
+ *
+ */
 public class ControlPanel extends JPanel {
 	/**
 	 * 
@@ -32,6 +32,11 @@ public class ControlPanel extends JPanel {
 	private String overallDestionation = "";
 	private FileToDownload[] filesToDownload = new FileToDownload[0];
 	private ArrayList<String> extensions;
+	/**
+	 * The constructor of the control panel.
+	 * @param activity The activity panel, where the process happens.
+	 * @param terminal The terminal panel, where messages are displayed.
+	 */
 	public ControlPanel(MainActivityPanel activity, TerminalPanel terminal)
 	{
 		super();
@@ -41,6 +46,12 @@ public class ControlPanel extends JPanel {
 		setBackground(Color.GRAY);
 		createMainControlPanel();
 	}
+	/**
+	 * The main control panel represents the first layer
+	 * of interaction with the user.
+	 * It contains an exit button, and a "begin button"
+	 * called "Download files". This fires the process.
+	 */
 	public void createMainControlPanel()
 	{
 		terminal.appendMessage("Entering main view.");
@@ -69,6 +80,11 @@ public class ControlPanel extends JPanel {
 		revalidate();
 		repaint();
 	}
+	/**
+	 * This method converts an array list to a normal array.
+	 * @param files The array list to be converted.
+	 * @return The converted array.
+	 */
 	public String[] toArray(ArrayList<String> files)
 	{
 		String[] newFiles = new String[files.size()];
@@ -78,6 +94,18 @@ public class ControlPanel extends JPanel {
 		}
 		return newFiles;
 	}
+	/**
+	 * The selection view is crucial for the system.
+	 * It contains a back button that leads back to the
+	 * main control panel where you can exit the system.
+	 * It contains options for setting the destination and 
+	 * entering a url. Also extensions can be inputed as well.
+	 * The option of slowing down is provided in order to see
+	 * the threads pool. Usually this happens to fast.
+	 * 
+	 * It also provides a way of setting the destination of all
+	 * the files or only specific ones. User decides.
+	 */
 	public void selectionView()
 	{
 		activity.filesToDonwloadView(filesToDownload,toArray(extensions));
@@ -87,6 +115,7 @@ public class ControlPanel extends JPanel {
 		{
 			createMainControlPanel();
 		});
+		//Destination setting.
 		JButton setDestination = new JButton("Set destination");
 		setDestination.addActionListener(e ->
 		{
@@ -108,6 +137,7 @@ public class ControlPanel extends JPanel {
 			setDestination.setEnabled(!setDestination.isEnabled());
 		});
 		applyAll.setBackground(Color.GRAY);
+		//Extension setting
 		JButton addExtensions = new JButton("Add extension");
 		addExtensions.addActionListener(e ->
 		{
@@ -115,6 +145,7 @@ public class ControlPanel extends JPanel {
 			extensions.add(extensionString);
 			activity.filesToDonwloadView(filesToDownload, toArray(extensions));
 		});
+		//URL addition
 		JButton addURL = new JButton("Add URL");
 		addURL.addActionListener(e ->
 		{
@@ -152,6 +183,7 @@ public class ControlPanel extends JPanel {
 				activity.filesToDonwloadView(filesToDownload,toArray(extensions));
 			}
 		});
+		//Download execution.
 		JButton download = new JButton("Proceed");
 		download.addActionListener(e -> 
 		{
@@ -174,6 +206,13 @@ public class ControlPanel extends JPanel {
 		revalidate();
 		repaint();
 	}
+	/**
+	 * The files extracted method represents the point
+	 * where all the files from the given URLs and given
+	 * constraints such as extensions are provided.
+	 * This will interact with the main activity panel
+	 * in order to display all of them.
+	 */
 	public void filesExtracted()
 	{
 		removeAll();
@@ -207,6 +246,12 @@ public class ControlPanel extends JPanel {
 		revalidate();
 		repaint();
 	}
+	/**
+	 * Downloading view represents the moment of thread pool
+	 * execution where the files are being downloaded.
+	 * @param noThreads The number of threads for the pool.
+	 * @param toDownload The files to be downloaded.
+	 */
 	public void downloading(int noThreads, ArrayList<FileToDownload> toDownload)
 	{
 		removeAll();
@@ -219,6 +264,12 @@ public class ControlPanel extends JPanel {
 		revalidate();
 		repaint();
 	}
+	/**
+	 * Adding a file to an array of files.
+	 * @param files The array of files that needs an addition.
+	 * @param file The additional file.
+	 * @return The resulting array of files after the addition.
+	 */
 	public FileToDownload[] addFile(FileToDownload[] files, FileToDownload file)
 	{
 		FileToDownload[] newArray = new FileToDownload[files.length + 1];

@@ -3,8 +3,12 @@ package terminal;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
-
 import javax.swing.JOptionPane;
+/**
+ * This class loads the escape button
+ * @author Sebastian
+ *
+ */
 public class LoadKeyboard {
 	public static void loadEscapeButton()
 	{

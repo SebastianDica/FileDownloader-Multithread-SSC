@@ -6,13 +6,17 @@ import java.awt.Font;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
+/**
+ * 
+ * The top panel just displays a pretty message.
+ * @author Sebastian
+ *
+ */
 public class TopPanel extends JPanel {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-
+	/**
+	 * Constructor of the panel
+	 */
 	public TopPanel()
 	{
 		super();

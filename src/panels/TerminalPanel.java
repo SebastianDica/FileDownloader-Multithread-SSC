@@ -4,20 +4,26 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.Observable;
-import java.util.Observer;
-
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.DefaultCaret;
-
-public class TerminalPanel extends JPanel implements Observer {
+/**
+ * The terminal panel is designed to display messages
+ * from the background processes.
+ * @author Sebastian
+ *
+ */
+public class TerminalPanel extends JPanel {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	private JTextArea mainArea;
+	/**
+	 * Constructor for the terminal panel.
+	 * Sets up a text area on a scrollpane
+	 */
 	public TerminalPanel()
 	{
 		super(new GridBagLayout());
@@ -28,6 +34,7 @@ public class TerminalPanel extends JPanel implements Observer {
        	mainArea.setForeground(Color.BLACK);
        	mainArea.setFont(new Font(Font.MONOSPACED,Font.PLAIN,15));
 		JScrollPane scrollPane = new JScrollPane(mainArea);
+		//A couple of constraints to keep everything in place
         GridBagConstraints constraints = new GridBagConstraints();
        	constraints.gridwidth = GridBagConstraints.REMAINDER;
        	constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -37,11 +44,12 @@ public class TerminalPanel extends JPanel implements Observer {
        	((DefaultCaret) mainArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
        	add(scrollPane, constraints);
 	}
+	/**
+	 * Appending a message to the terminal
+	 * @param message The message to be appended.
+	 */
 	public void appendMessage(String message)
 	{
 		mainArea.append(message + "\n");
-	}
-	@Override
-	public void update(Observable arg0, Object arg1) {
 	}
 }
